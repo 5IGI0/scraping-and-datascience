@@ -11,7 +11,7 @@ export $(cat .env)
 if [ "$DATAHUB_TOKEN" != "" ]
 then
     echo 'extracting domains...'
-    cut -d'/' -f3 "$1"|cut -d':' -f1|uniq > ."$1".domains
+    cut -d'/' -f3 "$1"|cut -d':' -f1|cut -d'?' -f1|cut -d'#' -f1|uniq > ."$1".domains
     echo 'removing duplicates...'
     sort ."$1".domains|uniq > ."$1".domains.sort
     echo 'sending domains to datahub...'

@@ -19,7 +19,8 @@ mydb = MySQLdb.connect(
 
 INDEXES = (
     ("`idx_host`", "`scrp_links`", "(`host`)"),
-)
+    ("`idx_filename`", "`scrp_links`", "(`filename`)"),
+    ("`idx_ext`", "`scrp_links`", "(`ext`)"))
 
 mycursor = mydb.cursor()
 # as urllib's ParseResult
@@ -40,6 +41,8 @@ CREATE TABLE IF NOT EXISTS `scrp_links`(
 
     -- sanitized values / generated values for indexes
     `host`     VARCHAR(255),
+    `filename` VARCHAR(127) GENERATED ALWAYS AS (LEFT(SUBSTRING_INDEX(path, '/', -1),127)) VIRTUAL,
+    `ext`      VARCHAR(32)  GENERATED ALWAYS AS (REVERSE(RIGHT(SUBSTRING_INDEX(path, '/', -1),32))) VIRTUAL,
 
     UNIQUE (`hash_id`)
 )""")

@@ -18,7 +18,7 @@ def sanitize_url(url: ParseResult) -> ParseResult:
 
 def is_blacklisted(url: ParseResult) -> bool:
     # block blogger's images
-    if url.hostname and url.hostnames.endswith(".googleusercontent.com") and url.path.startswith("/blogger_img_proxy/"):
+    if url.hostname and url.hostname.endswith(".googleusercontent.com") and url.path.startswith("/blogger_img_proxy/"):
         return True
     return url.hostname == 'blogger.googleusercontent.com'
 

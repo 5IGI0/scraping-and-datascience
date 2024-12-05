@@ -5,6 +5,8 @@ import idna
 from hashlib import sha1
 import argparse
 
+from url_sanitize import sanitize_url, is_blacklisted
+
 parser = argparse.ArgumentParser(description='add links to the link database')
 parser.add_argument('link_lists', nargs='+')
 parser.add_argument('--keep-indexes', action='store_true')
@@ -70,7 +72,9 @@ for f in args.link_lists:
             count += 1
 
             # print(line)
-            url = urlparse(line)
+            url = sanitize_url(urlparse(line))
+            if is_blacklisted(url):
+                continue
             hash_id = sha1(line.encode("utf-8")).hexdigest()
 
             host = url.hostname

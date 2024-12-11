@@ -19,20 +19,6 @@ mydb = MySQLdb.connect(
   database=os.getenv("LINK_DB_DTBS"),
   port=int(os.getenv("LINK_DB_PORT")))
 
-INDEXES = (
-    ("`idx_host`", "`scrp_links`", "(`host`)"),
-    ("`idx_filename`", "`scrp_links`", "(`filename`)"),
-    ("`idx_ext`", "`scrp_links`", "(`ext`)"))
-
-mycursor = mydb.cursor()
-# as urllib's ParseResult
-mycursor.execute("""
-CREATE TABLE IF NOT EXISTS `scrp_links`(
-    `hash_id` CHAR(40) NOT NULL,
-
-    `raw`      TEXT NOT NULL,
-    `scheme`   TEXT NOT NULL,
-    `netloc`   TEXT NOT NULL,
     `path`     TEXT NOT NULL,
     `params`   TEXT NOT NULL,
     `query`    TEXT NOT NULL,
@@ -48,18 +34,6 @@ CREATE TABLE IF NOT EXISTS `scrp_links`(
 
     UNIQUE (`hash_id`)
 )""")
-
-if not args.keep_indexes:
-    print("dropping indexes...")
-    for index in INDEXES:
-        print(index[0])
-        mycursor.execute("DROP INDEX IF EXISTS "+index[0]+" ON "+index[1])
-    mycursor.execute("COMMIT") # idk if it is needed when dropping indexes
-    print("done")
-
-INSERT_QUERY = """INSERT IGNORE INTO `scrp_links`(`hash_id`,`raw`,`scheme`,`netloc`,`path`,`params`,`query`,`fragment`,`username`,`password`,`port`,`host`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-
-rows = []
 count = 0
 
 for f in args.link_lists:
@@ -81,18 +55,7 @@ for f in args.link_lists:
             port = None
 
             try:
-                port = url.port
-            except ValueError: # raised if port port<0 or port > 0xFFFF
-                pass
-
-            if host:
-                try:
-                    host = idna.decode(host)
-                except:
-                    pass
-            
-            rows.append((hash_id,line,url.scheme,url.netloc,url.path,url.params,url.query,url.fragment,url.username,url.password,port,host))
-
+                port = url
             if len(rows) >= 10000:
                 print("insert", count)
                 mycursor.executemany(INSERT_QUERY, rows)
